@@ -171,3 +171,56 @@
 
 (define (cube x)
   (* x x x))
+
+; one detail of a procedure's implementation that should not matter to the user
+; of the procedure is the implementer's choice of names
+; => Variable scoping
+; To allow other functions that have names like iter etc. We can rewrite the
+; sqrt procedure as follows:
+(define (blocksqrt x)
+  (define (goodenough? guess x)
+    (< (abs (- (square guess) x)) 0.000001))
+  (define (improve guess x) (average guess (/ x guess)))
+  (define (sqrtiter guess x)
+    (if (goodenough? guess x)
+        guess
+        (sqrtiter (improve guess x) x)))
+  (sqrtiter 1.0 x))
+; Such nesting of definitions is called block structure
+; we can clean this code up by using lexical scoping
+(define (finalsqrt x)
+  (define (good-enough? guess)
+    (< (abs (- (square guess) x)) 0.001))
+  (define (improve guess)
+    (average guess (/ x guess)))
+  (define (sqrt-iter guess)
+    (if (good-enough? guess)
+        guess
+        (sqrt-iter (improve guess))))
+  (sqrt-iter 1.0))
+; because x is a function variable on the outermost layer it is implicitly
+; available for all inner definitions
+
+; 1.2 Procedures and the Processes They Generate
+; Linear Recursion and Iteration
+(define (factorial n)
+  (if (= n 1) 1
+      (* n (factorial (- n 1)))))
+
+(define (factorial2 n)
+  (fact-iter 1 1 n))
+
+(define (fact-iter product counter max-count)
+  (if (> counter max-count)
+      product
+      (fact-iter (* counter product)
+                 (+ counter 1)
+                 max-count)))
+
+; Every iterative process can be realized "in hardware" as a machine that has
+; a fixed set of registers and no auxiliary memory.
+; In contrast, recursive processes require a machine that uses an auxiliary
+; data structure known as a stack.
+; Usually any linearly recursive function can be captured with state variables
+; => Tail recursive
+; Exercise 1.9
