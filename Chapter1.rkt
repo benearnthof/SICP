@@ -144,3 +144,30 @@
   (sqrtiter 1 x))
 
 ; 1.7
+(define (sqrt2 x)
+  (doiter 1 x))
+
+(define (doiter guess x)
+  (if (< (abs (- guess (improve guess x))) 0.000001)
+      guess
+      (doiter (improve guess x) x)))
+
+; 1.8 Newton's method for cube roots is based on the fact that if y is an
+; approximation to the cube root of x then a better approximation is given by
+; ((x/y^2) + (2y))/3
+(define (cuberoot x)
+  (cuberootiter 1 x))
+
+(define (cuberootiter guess x)
+  (if (goodenoughcube? guess x)
+      guess
+      (cuberootiter (improvecube guess x) x)))
+
+(define (improvecube y x)
+  (/ (+ (/ x (square y))(* 2 y)) 3))
+
+(define (goodenoughcube? guess x)
+  (< (abs (- (cube guess) x)) 0.000001))
+
+(define (cube x)
+  (* x x x))
