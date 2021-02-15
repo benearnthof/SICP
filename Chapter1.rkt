@@ -224,3 +224,80 @@
 ; Usually any linearly recursive function can be captured with state variables
 ; => Tail recursive
 ; Exercise 1.9
+(define (ackermann x y)
+  (cond ((= y 0) 0)
+        ((= x 0) (* 2 y))
+        ((= y 1) 2)
+        (else (ackermann (- x 1) (ackermann x (- y 1))))))
+(ackermann 1 10)
+(ackermann 2 4)
+(ackermann 3 3)
+; 1.2.2 Tree Recursion
+(define (fib n)
+  (cond ((= n 0) 0)
+        ((= n 1) 1)
+        (else (+ (fib (- n 1))
+                 (fib (- n 2))))))
+(define (fibiter n)
+  (fibstep 1 0 n))
+(define (fibstep a b count)
+  (if (= count 0)
+      b ; a = a + b, b = a
+      (fibstep (+ a b) a (- count 1))))
+
+; to get the 5th number we get:
+; (+ a b) = a_n, a = b_n)
+; (+ a_n b_n) = a_n+1, a_n = b_n+1
+; => linear iteration, only order of N steps required to execute function
+; But the interpreter itself uses tree recursion to operate on hierarchical data
+; Exercise 1.11
+; recursive procedure
+(define (fun n)
+  (if (< n 3)
+      n
+      (+ (fun (- n 1)) (* 2 (fun (- n 2))) (* 3 (fun (- n 3))))))
+; iterative procedure
+(define (fun2 n)
+  (if (< n 3)
+      n
+      (fiter 2 1 0 n)))
+
+(define (fiter a b c count) ; the number n becomes our count => capture state
+  (if (< count 3)
+      a
+      (fiter (+ a (* 2 b) (* 3 c))
+             a ; a becomes new b
+             b ; b becomes new c
+             (- count 1))))
+
+(define (pascal row col)
+  (cond ((< row 3) 1)
+        ((= col 1) 1)
+        ((= col row) 1) ; need to check for rightmost column
+        (else (+ (pascal (- row 1) (- col 1)) (pascal (- row 1) col)))))
+
+; 1.2.4 Exponentiation
+; a to the power of b is equal to a times a times a ... times a; b times
+(define (expt a b)
+  (cond ((= b 0) 1)
+        ((= b 1) a)
+        (else (* a (expt a (- b 1))))))
+
+; iterative exponent
+(define (expt2 b n)
+  (expt-iter b n 1))
+
+(define (expt-iter b counter product)
+  (if (= counter 0)
+      product
+      (expt-iter b (- counter 1) (* b product)))) ; we carry the product with us
+; this linear recursion is much faster.
+; even faster exponentiation with recursive squaring
+(define (fast-expt b n)
+  (cond ((= n 0) 1)
+        ((even? n) (square (fast-expt b (/ n 2))))
+        (else (* b (fast-expt b (- n 1))))))
+
+(define (even? n)
+  (= (remainder n 2) 0))
+
