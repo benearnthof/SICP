@@ -301,3 +301,98 @@
 (define (even? n)
   (= (remainder n 2) 0))
 
+(define (gcd a b)
+  (if (= b 0)
+      a
+      (gcd b (remainder a b))))
+
+; need remainder operation 
+(define (remainder a b)
+  (cond ((= 0 (- a b)) 0)
+        ((< (- a b) 0) a)
+        (else (remainder (- a b) b))))
+
+; searching for divisors
+(define (smallest-divisor n)
+  (find-divisor n 2))
+
+(define (find-divisor n test-divisor)
+  (cond ((> (square test-divisor) n) n)
+        ((divides? test-divisor n) test-divisor)
+        (else (find-divisor n (next test-divisor)))))
+(define (divides? a b)
+  (= 0 (remainder b a)))
+
+; 1.23
+(define (next input)
+  (if (= input 2)
+      3
+      (+ input 2)))
+; this lets us write a really short primality test
+(define (prime? n)
+  (= n (smallest-divisor n)))
+
+; 1.21
+(smallest-divisor 199)
+(smallest-divisor 1999)
+(smallest-divisor 19999)
+
+; 1.22
+(define (timed-prime-test n)
+  (newline); newline keyword
+  (display n); display keyword 
+  (start-prime-test n (runtime))); runtime keyword
+
+(define (start-prime-test n start-time)
+  (if (prime? n)
+      (report-prime (- (runtime) start-time))))
+
+(define (report-prime elapsed-time)
+  (display "***")
+  (display elapsed-time))
+; procedure that searches for primes in given range
+(define (search-for-primes start end)
+  (timed-prime-test start)
+  (cond ((= start end)
+         (newline)
+         (display "Search Finished."))
+        (else (search-for-primes (+ start 1) end))))
+
+; 1.3 Formulating abstractions with higher order procedures
+(define (sum-integers a b)
+  (if (> a b)
+      0
+      (+ a (sum-integers (+ a 1) b))))
+
+(define (sum-cubes a b)
+  (if (> a b)
+      0
+      (+ (cube a) (sum-cubes (+ a 1) b))))
+; If we want to define a procedure that returns the sum of numbers in a range
+; combined with an arbitrary procedure we need quoting (I think)
+(define (pi-sum a b)
+  (if (> a b)
+      0
+      (+ (/ 1.0 (* a (+ a 2)))
+         (pi-sum (+ a 4) b))))
+
+(define (sum fun a next b)
+  (if (> a b)
+      0
+      (+ (fun a)
+         (sum fun (next a) next b))))
+
+(define (sum-cubes2 a b)
+  (sum cube a inc b))
+; we dont even have to quote anything yet, we can just pass text that gets
+; substituted automatically.
+(define (identity x) x)
+(define (sum-integers2 a b)
+  (sum identity a inc b))
+
+(define (pifun a)
+  (/ 1.0 (* a (+ a 2))))
+(define (pinext a)
+  (+ a 4))
+(define (pi-sum2 a b)
+  (sum pifun a pinext b))
