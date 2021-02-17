@@ -396,3 +396,24 @@
   (+ a 4))
 (define (pi-sum2 a b)
   (sum pifun a pinext b))
+
+; we can use this as a building block in numerical integration
+(define (integral f a b dx)
+  (define (add-dx x)
+    (+ x dx))
+  (* dx (sum f (+ a (/ dx 2.0)) add-dx b)))
+
+; 1.29 Simpson's Rule is a more accurate method of numerical integration
+; h = (b - a)/n
+; yk = f(a + kh)
+; integral = (h/3) * (y0 + 4y1 + 2y2 + 4y3 + ... + 4yn-1 + yn)
+
+(define (simpson f a b n)
+  (define h (/ (- b a) n))
+  (define (simp-next x) (+ x (* 2.0 h)))
+  (* (/ h 3.0)
+     (+ (f a) (f b)
+        (* 4.0 (sum f (+ a h) simp-next b))
+        (* 2.0 (sum f (+ a (* 2.0 h)) simp-next (- b h))))))
+
+; 1.30
