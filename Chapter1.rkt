@@ -417,3 +417,64 @@
         (* 2.0 (sum f (+ a (* 2.0 h)) simp-next (- b h))))))
 
 ; 1.30
+(define (sum-tail term a next b)
+  (define (iter a result); use result to keep track of sum already done
+    (if (> a b)
+        result
+        (iter (next a) (+ result (term a)))))
+  (iter a 0))
+
+; 1.31
+(define (product fun a next b)
+  (if (> a b)
+      1
+      (* (fun a)
+         (product fun (next a) next b))))
+
+(define (next-factorial x) (+ x 1))
+(define (factorial3 n)
+  (product identity 1 next-factorial n))
+
+; 1.32
+(define (accumulate combiner null-value fun a next b)
+  (if (> a b)
+      null-value
+      (combiner (fun a)
+                (accumulate combiner null-value fun (next a) next b))))
+
+(pi-sum2 1 100)
+(accumulate + 0 pifun 1 pinext 100)
+; yields the same result
+
+; 1.3.2 Constructing Procedures Using lambda
+(lambda (x) (+ x 4))
+; returns a procedure
+; (lambda (<formal-parameters>) <body>)
+((lambda (x y z) (+ x y (square z))) 1 2 3)
+; This way we directly apply the procedure to the given variables
+
+; Using let to create local variables
+; f(x, y) = x(1+xy)^2 + y(1-y) + (1+xy)(1-y)
+(define (funxy x y)
+  (let ((a (+ 1 (* x y)))
+        (b (- 1 y)))
+    (+ (* x (square a))
+       (* y b)
+       (* a b))))
+; general form of a let expression
+;(let ((var1 exp1)
+;      (var2 exp2)
+;      ...
+;      (varn expn))
+;  body)
+; let var1 have the value exp1 and
+; let var2 have the value exp2 and ...
+; let varn have the value expn in
+; body => need extra layer of parenthesis to define scope of variables
+; 1.34
+(define (fung g)
+  (g 2)) ; g has to be a procedure
+(fung cube)
+(fung (lambda (z) (* z (+ z 1))))
+
+; procedures as general methods 
