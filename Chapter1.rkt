@@ -565,4 +565,31 @@
 (+ 2.0 (cont-frac2 next-n next-d 100 1))
 ; we need to remember the order of the < and > operators
 
-; 1.34 Procedures as Returned Values 
+; 1.34 Procedures as Returned Values
+(define (average-damp f)
+  (lambda (x) (average x (f x))))
+; this returns a procedure!
+((average-damp square) 10)
+
+; we can rewrite the sqrt procedure from above
+(define (sqrt-lambified x)
+  (fixed-point (average-damp (lambda (y) (/ x y))) 1.0))
+
+; newtons method and a derivative procedure
+(define dx 0.00001)
+(define (deriv g)
+  (lambda (x) (/ (- (g (+ x dx)) (g x)) dx)))
+
+((deriv square) 2)
+
+(define (newton-transform g)
+  (lambda (x) (- x (/ (g x) ((deriv g) x )))))
+(define (newtons-method g guess)
+  (fixed-point (newton-transform g) guess))
+
+; now it is trivial to implement newtons method for finding square roots
+(define (sqrt-newton x)
+  (newtons-method
+   (lambda (y) (- (square y) x )) 1.0))
+
+; TODO 1.40, 1.41, 1.42 1.43 1.44 1.45 1.46
