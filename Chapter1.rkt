@@ -477,4 +477,92 @@
 (fung cube)
 (fung (lambda (z) (* z (+ z 1))))
 
-; procedures as general methods 
+; procedures as general methods
+(define (search f neg-point pos-point)
+  (define (close-enough? x y) (< (abs (- x y)) 0.00001))
+  (let ((midpoint (average neg-point pos-point)))
+    (if (close-enough? neg-point pos-point)
+        midpoint
+        (let ((test-value (f midpoint)))
+          (cond ((positive? test-value)
+                 (search f neg-point midpoint))
+                ((negative? test-value)
+                 (search f midpoint pos-point))
+                (else midpoint))))))
+
+(define (half-interval-method f a b)
+  (let ((a-value (f a))
+        (b-value (f b)))
+    (cond ((and (negative? a-value) (positive? b-value))
+           (search f a b))
+          ((and (positive? a-value) (negative? b-value))
+           (search f b a))
+          (else
+           (error "Values are not of opposite sign" a b)))))
+
+(half-interval-method sin 2.0 4.0)
+; now we can use lambda to compute roots of arbitrary functions
+(half-interval-method (lambda (x) (cube x)) -1 1)
+
+; Finding fixed points of functions
+; fixed points satisfy the equation f(x) = x
+(define tolerance 0.00001)
+(define (fixed-point f first-guess)
+  (define (close-enough? v1 v2)
+    (< (abs (- v1 v2)) tolerance))
+  (define (try guess)
+    (display guess)
+    (newline)
+    (let ((next (f guess)))
+      (if (close-enough? guess next)
+          next
+          (try next))))
+  (try first-guess))
+; we can use this with defined functions or define functions in line
+(fixed-point cos 1.0)
+(fixed-point (lambda (x) (+ (sin x) (cos x))) 1)
+; using this to define a procedure for the square root operation
+; but this does not converge.
+; so we need to make better guesses => use averages
+(define (sqrt-fp x)
+  (fixed-point (lambda (y) (average y (/ x y))) 1.0))
+
+; 1.35 Golden Ratio
+(define (phi)
+  (fixed-point (lambda (x) (average x (+ 1 (/ 1 x)))) 1.0))
+
+; 1.36 Solving x^x = 1000
+(define (solve-x-x)
+  (fixed-point (lambda (x) (/ (log 1000) (log x))) 10))
+; add average damping
+(define (solve-x-x2)
+  (fixed-point (lambda (x) (average x (/ (log 1000) (log x)))) 10))
+
+; 1.37 Continued fractions
+(define (cont-frac n d depth)
+  (if (= 0 depth)
+      (/ n (+ d n))
+      (/ n (+ d (cont-frac n d (- depth 1))))))
+
+(/ 1 (phi))
+(cont-frac 1.0 1.0 10)
+; continued fraction that takes procedures for n and d
+(define (cont-frac2 nproc dproc depth init)
+  (if (= init depth)
+      (/ (nproc init) (+ (dproc init) (nproc init)))
+      (/ (nproc init) (+ (dproc init) (cont-frac2 nproc dproc depth (+ init 1))))))
+
+(define (next-n x) 1)
+(define (next-d x)
+  (define (countthrees number)
+    (if (< (- number 3) 1)
+      1
+      (+ 1 (countthrees (- number 3)))))
+  (if (> (abs (remainder (- x 2) 3)) 0)
+      1
+      (* 2 (countthrees x))))
+
+(+ 2.0 (cont-frac2 next-n next-d 100 1))
+; we need to remember the order of the < and > operators
+
+; 1.34 Procedures as Returned Values 
